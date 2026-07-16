@@ -17,5 +17,7 @@ services:
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: ADMIN_IDS
+        value: "7073067783"
       - key: NODE_ENV
         value: production
