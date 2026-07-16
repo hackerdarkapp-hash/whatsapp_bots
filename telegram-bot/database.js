@@ -1,53 +1,50 @@
 'use strict';
-const Database = require('better-sqlite3');
+const fs   = require('fs');
 const path = require('path');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'allowed_phones.db');
-const db = new Database(DB_PATH);
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'allowed_phones.json');
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS allowed_phones (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    phone    TEXT    UNIQUE NOT NULL,
-    added_by TEXT,
-    note     TEXT,
-    added_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-`);
+function read() {
+  try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); }
+  catch { return { phones: [] }; }
+}
+
+function write(data) {
+  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+}
 
 module.exports = {
-  /** Add a phone number (digits only). Returns true if inserted, false if already existed. */
+  /** Add phone (digits only). Returns true if new, false if already existed. */
   addPhone(phone, addedBy, note) {
     phone = String(phone).replace(/\D/g, '');
     if (!phone) return false;
-    const r = db.prepare(
-      'INSERT OR IGNORE INTO allowed_phones (phone, added_by, note) VALUES (?, ?, ?)'
-    ).run(phone, String(addedBy || ''), note || '');
-    return r.changes > 0;
+    const db = read();
+    if (db.phones.find(p => p.phone === phone)) return false;
+    db.phones.unshift({ phone, added_by: String(addedBy || ''), note: note || '', added_at: new Date().toISOString() });
+    write(db);
+    return true;
   },
 
-  /** Remove a phone number. Returns true if deleted. */
+  /** Remove phone. Returns true if deleted. */
   removePhone(phone) {
     phone = String(phone).replace(/\D/g, '');
-    const r = db.prepare('DELETE FROM allowed_phones WHERE phone = ?').run(phone);
-    return r.changes > 0;
+    const db = read();
+    const before = db.phones.length;
+    db.phones = db.phones.filter(p => p.phone !== phone);
+    if (db.phones.length === before) return false;
+    write(db);
+    return true;
   },
 
-  /** Check if a phone number is in the whitelist. */
+  /** Check if phone is whitelisted. */
   isAllowed(phone) {
     phone = String(phone).replace(/\D/g, '');
-    return !!db.prepare('SELECT 1 FROM allowed_phones WHERE phone = ? LIMIT 1').get(phone);
+    return !!read().phones.find(p => p.phone === phone);
   },
 
-  /** Return all allowed phones sorted by newest first. */
-  listPhones() {
-    return db.prepare(
-      'SELECT phone, added_by, note, added_at FROM allowed_phones ORDER BY added_at DESC'
-    ).all();
-  },
+  /** All phones sorted newest-first. */
+  listPhones() { return read().phones; },
 
-  /** Return total count. */
-  count() {
-    return db.prepare('SELECT COUNT(*) as c FROM allowed_phones').get().c;
-  }
+  /** Total count. */
+  count() { return read().phones.length; }
 };
