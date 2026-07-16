@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "DARKWEBOTS"
+version = "1.0.0"
+id = "artifacts/darkwebots"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19620
+
+[services.development]
+run = "pnpm --filter @workspace/darkwebots run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/darkwebots", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/darkwebots/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19620"
+BASE_PATH = "/"
