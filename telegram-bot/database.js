@@ -14,13 +14,27 @@ function write(data) {
 }
 
 module.exports = {
-  /** Add phone (digits only). Returns true if new, false if already existed. */
-  addPhone(phone, addedBy, note) {
+  /** Add phone. Returns true if new, false if already existed. */
+  addPhone(phone, addedBy, note, subscription, activationCode) {
     phone = String(phone).replace(/\D/g, '');
     if (!phone) return false;
     const db = read();
-    if (db.phones.find(p => p.phone === phone)) return false;
-    db.phones.unshift({ phone, added_by: String(addedBy || ''), note: note || '', added_at: new Date().toISOString() });
+    const existing = db.phones.find(p => p.phone === phone);
+    if (existing) {
+      // Update subscription/code if provided
+      if (subscription)    existing.subscription    = subscription;
+      if (activationCode)  existing.activation_code = activationCode;
+      write(db);
+      return false;
+    }
+    db.phones.unshift({
+      phone,
+      added_by:        String(addedBy || ''),
+      note:            note            || '',
+      subscription:    subscription    || '',
+      activation_code: activationCode  || '',
+      added_at:        new Date().toISOString(),
+    });
     write(db);
     return true;
   },
@@ -28,9 +42,9 @@ module.exports = {
   /** Remove phone. Returns true if deleted. */
   removePhone(phone) {
     phone = String(phone).replace(/\D/g, '');
-    const db = read();
+    const db     = read();
     const before = db.phones.length;
-    db.phones = db.phones.filter(p => p.phone !== phone);
+    db.phones    = db.phones.filter(p => p.phone !== phone);
     if (db.phones.length === before) return false;
     write(db);
     return true;
@@ -46,5 +60,5 @@ module.exports = {
   listPhones() { return read().phones; },
 
   /** Total count. */
-  count() { return read().phones.length; }
+  count() { return read().phones.length; },
 };
