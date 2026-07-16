@@ -199,6 +199,41 @@ const COUNTRIES = [
   { code:'NZ', name:'نيوزيلندا',       nets:['Spark','Vodafone','2degrees'] },
   { code:'FJ', name:'فيجي',            nets:['Vodafone','Digicel'] },
   { code:'PG', name:'بابوا غينيا',     nets:['Digicel','Bemobile'] },
+  // ── جزر المحيط الهادئ (إضافية) ──
+  { code:'SB', name:'جزر سليمان',       nets:['Our Telekom','Bmobile'] },
+  { code:'VU', name:'فانواتو',           nets:['Digicel','TVL'] },
+  { code:'WS', name:'ساموا',             nets:['Digicel','Bluesky'] },
+  { code:'TO', name:'تونغا',             nets:['Digicel','TCC'] },
+  { code:'KI', name:'كيريباتي',          nets:['Kiribati Telecom'] },
+  { code:'NR', name:'ناورو',             nets:['Digicel'] },
+  { code:'TV', name:'توفالو',            nets:['Tuvalu Telecom'] },
+  { code:'PW', name:'بالاو',             nets:['PNCC'] },
+  { code:'MH', name:'جزر مارشال',        nets:['NTSC'] },
+  { code:'FM', name:'ميكرونيزيا',        nets:['FSM Telecom','Docomo Pacific'] },
+  // ── آسيا (متبقية) ──
+  { code:'MO', name:'ماكاو',             nets:['CTM','Hutchison','3 Macau'] },
+  { code:'BN', name:'بروناي',            nets:['DST','Progresif'] },
+  { code:'TL', name:'تيمور الشرقية',     nets:['Timor Telecom','Telemor','Telkomcel'] },
+  { code:'BT', name:'بوتان',             nets:['TashiCell','B-Mobile'] },
+  { code:'KP', name:'كوريا الشمالية',    nets:['Koryolink'] },
+  // ── أوروبا (دول صغيرة) ──
+  { code:'AD', name:'أندورا',            nets:['Andorra Telecom'] },
+  { code:'MC', name:'موناكو',            nets:['Monaco Telecom'] },
+  { code:'SM', name:'سان مارينو',        nets:['San Marino Telecom'] },
+  { code:'LI', name:'ليختنشتاين',        nets:['Salt','Liechtenstein Telecom'] },
+  { code:'VA', name:'الفاتيكان',         nets:['Vatican Telecom'] },
+  // ── الكاريبي وأمريكا اللاتينية (متبقية) ──
+  { code:'AG', name:'أنتيغوا وبربودا',   nets:['Digicel','Flow'] },
+  { code:'BB', name:'بربادوس',           nets:['Digicel','Flow'] },
+  { code:'BS', name:'جزر البهاما',        nets:['BTC','Aliv'] },
+  { code:'BZ', name:'بليز',              nets:['Belize Telemedia','Smart'] },
+  { code:'DM', name:'دومينيكا',          nets:['Digicel','Flow'] },
+  { code:'GD', name:'غرينادا',           nets:['Digicel','Flow'] },
+  { code:'GY', name:'غيانا',             nets:['GTT','Digicel'] },
+  { code:'KN', name:'سانت كيتس ونيفيس', nets:['Digicel','Flow'] },
+  { code:'LC', name:'سانت لوسيا',        nets:['Digicel','Flow'] },
+  { code:'SR', name:'سورينام',           nets:['Telesur','Digicel'] },
+  { code:'VC', name:'سانت فنسنت',        nets:['Digicel','Flow'] },
 ];
 
 const COUNTRY_MAP = Object.fromEntries(COUNTRIES.map(c => [c.code, c]));
