@@ -14,16 +14,14 @@ function write(data) {
 }
 
 module.exports = {
-  /** Add phone. Returns true if new, false if already existed. */
   addPhone(phone, addedBy, note, subscription, activationCode) {
     phone = String(phone).replace(/\D/g, '');
     if (!phone) return false;
     const db = read();
     const existing = db.phones.find(p => p.phone === phone);
     if (existing) {
-      // Update subscription/code if provided
-      if (subscription)    existing.subscription    = subscription;
-      if (activationCode)  existing.activation_code = activationCode;
+      if (subscription)   existing.subscription    = subscription;
+      if (activationCode) existing.activation_code = activationCode;
       write(db);
       return false;
     }
@@ -39,7 +37,6 @@ module.exports = {
     return true;
   },
 
-  /** Remove phone. Returns true if deleted. */
   removePhone(phone) {
     phone = String(phone).replace(/\D/g, '');
     const db     = read();
@@ -50,15 +47,12 @@ module.exports = {
     return true;
   },
 
-  /** Check if phone is whitelisted. */
   isAllowed(phone) {
     phone = String(phone).replace(/\D/g, '');
     return !!read().phones.find(p => p.phone === phone);
   },
 
-  /** All phones sorted newest-first. */
   listPhones() { return read().phones; },
 
-  /** Total count. */
   count() { return read().phones.length; },
 };
